@@ -11,19 +11,20 @@ function App() {
   const [songName, setSongName] = useState("Laal Dupatta - Mujhse Shaadi Karogi");
   let isPlaying = false;
   const music = document.getElementById('audio');
+  const list = [...songList];
 
   const getData = (e) => {
     getDownloadURL(ref(storage, `${e}.mp3`))
     .then((url) => {
       setSongUrl(url);
-      console.log(url);
+      // console.log(url);
     })
   };
 
   const getSongs = () => {
     listAll(ref(storage)).then((list) => {
       setSongList(list.items);
-      console.log(list.items);
+      // console.log(list.items);
     })
   }
 
@@ -33,12 +34,13 @@ function App() {
 
   useEffect(() => {
     getSongs();
-  }, [])
+  }, []);
 
   const handleChange = (e) => {
-    debugger
     setSongName(e);
-    console.log(e);
+    pauseSong();
+    music.currentTime = 0;
+    // console.log(e);
   }
 
   const playSong = () => {
@@ -56,6 +58,31 @@ function App() {
 
   const handleSong = () => {
     isPlaying ? pauseSong() : playSong();
+  }
+
+  const nextSong = (e) => {
+    // console.log(e);
+    e.map((list, id) => {
+      if ((list._location.path_).replace('.mp3', '') === songName) {
+        // console.log(id);
+        setSongName((e[id+1]._location.path_).replace('.mp3', ''));
+        pauseSong();
+        music.currentTime = 0;
+        // console.log(songName);
+      }
+    });
+  }
+  const prevSong = (e) => {
+    // console.log(e);
+    e.map((list, id) => {
+      if ((list._location.path_).replace('.mp3', '') === songName) {
+        // console.log(id);
+        setSongName((e[id-1]._location.path_).replace('.mp3', ''));
+        pauseSong();
+        music.currentTime = 0;
+        // console.log(songName);
+      }
+    });
   }
 
   // console.log(storage);
@@ -80,9 +107,9 @@ function App() {
       <div className='player border-t border-white p-5 bg-gray-900 text-white flex flex-col sm:flex-row gap-10 sm:gap-16 items-center'>
         <h1>{songName}</h1>
         <div className='controls flex gap-10'>
-          <span className='fa fa-step-backward cursor-pointer'></span>
-          <span id='play-pause' className='fa fa-play cursor-pointer' onClick={() => handleSong()}></span>
-          <span className='fa fa-step-forward cursor-pointer'></span>
+          <span className='fa fa-step-backward cursor-pointer' onClick={() => prevSong(list)} title='previous'></span>
+          <span id='play-pause' className='fa fa-play cursor-pointer' onClick={() => handleSong()} title="play/pause"></span>
+          <span className='fa fa-step-forward cursor-pointer' onClick={() => nextSong(list)} title='next'></span>
         </div>
       </div>
     </div>
